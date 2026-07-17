@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Chromium E621 Mobile Client</title>
+  <link rel="stylesheet" href="./css/tailwind.css">
+
+  <script src="./js/startup.js"></script>
+
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+
+<body class="nsfw-blur-enabled">
+
+  <div id="beta-test-banner"
+    class="bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-amber-500/10 border-b border-amber-500/30 text-amber-400 text-center py-1.5 px-4 text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-2 select-none z-50">
+    <span class="flex h-2 w-2 relative">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+    </span>
+    <span id="banner-text">БЕТА ТЕСТ: Приложение в стадии тестирования</span>
+  </div>
+
+  <header id="app-header">
+    <div class="header-top">
+      <div class="logo" id="main-logo-text">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="var(--accent)" stroke-width="3" />
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="var(--accent-hover)" stroke-width="3" stroke-linecap="round" />
+        </svg>
+        <div class="flex flex-col items-start leading-none" style="gap: 2px;">
+          <div>CHROMIUM<span class="provider-brand-suffix">E621</span></div>
+          <span id="user-greeting" class="text-[9px] font-normal text-zinc-500 tracking-wider capitalize"></span>
+        </div>
+      </div>
+
+      <div id="header-actions" class="flex items-center gap-2">
+        <div id="api-provider-switch" class="flex rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 cursor-pointer text-[11px] font-bold">
+          <div id="prov-e621" class="px-3 flex items-center justify-center transition-colors">Fur</div>
+          <div id="prov-r34" class="px-3 flex items-center justify-center transition-colors">R34</div>
+        </div>
+        <button id="quick-panic-btn"
+          class="bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 hover:text-red-500 transition-all duration-200"
+          title="Режим паники">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+            </path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Контейнер поиска -->
+    <div class="search-container" id="search-section">
+      <div class="search-input-wrapper">
+        <textarea id="search-input" rows="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Поиск тегов..."></textarea>
+        <button class="clear-btn" id="clear-input-btn">✕</button>
+        <div class="suggestions" id="suggestions" style="display: none;"></div>
+      </div>
+
+      <button
+        class="action-btn search-action-btn flex items-center justify-center border-2 border-dashed border-amber-500/50 hover:border-amber-500 rounded-lg bg-amber-500/5 active:scale-90 transition-all duration-150"
+        id="fav-search-btn" title="Избранные теги">
+        <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+          </path>
+        </svg>
+      </button>
+
+      <button
+        class="action-btn search-action-btn flex items-center justify-center border border-zinc-800 hover:border-zinc-700 rounded-lg bg-zinc-900/40 active:scale-90 transition-all duration-150"
+        id="history-search-btn" title="История поиска">
+        <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </button>
+
+      <button class="action-btn search-action-btn primary flex items-center justify-center active:scale-90 transition-all duration-150"
+        id="search-btn">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="media-type-switch" id="media-type-container">
+      <div class="media-type-slider state-all" id="media-type-backplane"></div>
+
+      <button type="button" class="media-type-btn active" id="media-type-btn-all" data-mode="all" aria-pressed="true">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span id="media-type-label-all">Все</span>
+      </button>
+
+      <button type="button" class="media-type-btn" id="media-type-btn-photo" data-mode="photo" aria-pressed="false">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+        <span id="media-type-label-photo">Фото</span>
+      </button>
+
+      <button type="button" class="media-type-btn" id="media-type-btn-video" data-mode="video" aria-pressed="false">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 2.25-4.5 2.25V9.75z" />
+        </svg>
+        <span id="media-type-label-video">Видео</span>
+      </button>
+    </div>
+
+    <div class="tag-operator-bar" id="favorite-searches-bar" style="display: none; flex-wrap: nowrap; gap: 6px;"></div>
+
+    <div class="period-selector" id="popularity-period-bar">
+      <button class="period-btn active" data-period="all" id="p-feed">Лента</button>
+      <button class="period-btn" data-period="1d" id="p-day">День</button>
+      <button class="period-btn" data-period="7d" id="p-week">Неделя</button>
+      <button class="period-btn" data-period="30d" id="p-month">Месяц</button>
+      <button class="period-btn" data-period="alltime" id="p-alltime">Всё время</button>
+    </div>
+  </header>
+
+  <main class="main-content" id="scroll-container">
+    <div id="panel-gallery" class="view-panel active">
+      <div class="grid-container grid-squares" id="gallery-grid"></div>
+
+      <div id="loading-indicator" class="flex flex-col justify-center items-center py-6 w-full hidden gap-2">
+        <div class="animate-spin rounded-full h-8 w-8 border-4 border-zinc-700/60 border-t-[var(--accent)]"></div>
+        <span class="text-xs text-zinc-500 font-medium" id="lbl-loading-indicator-text">Загрузка</span>
+      </div>
+
+      <div id="infinite-scroll-trigger" style="height: 20px; margin-top: 10px;"></div>
+    </div>
+
+    <div id="panel-bookmarks" class="view-panel">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-md font-bold" id="lbl-local-favs" style="color: var(--accent);">Локальные закладки</h3>
+      </div>
+      <div class="grid-container grid-squares" id="bookmarks-grid"></div>
+    </div>
+
+    <div id="panel-recommendations" class="view-panel">
+      <div
+        style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 15px;">
+        <h4 id="lbl-recs-title" style="color: var(--accent); margin-bottom: 4px; font-weight: bold;">Умные рекомендации
+        </h4>
+        <p style="font-size: 0.8rem; color: var(--text-muted);" id="lbl-rec-desc">
+          Алгоритм анализирует закладки, строит карту интересов по тегам и выдает рекомендации.
+        </p>
+      </div>
+      <div class="grid-container grid-squares" id="recs-grid"></div>
+    </div>
+
+    <div id="panel-settings" class="view-panel">
+
+      <!-- Панель разработчика полностью удалена по просьбе пользователя -->
+
+      <!-- Вся группа статистики свернута -->
+      <div class="settings-group p-4" id="group-stats">
+        <div class="font-bold text-[var(--accent)] border-b border-zinc-800 pb-2 mb-3 text-sm flex items-center gap-2">
+          <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+            </path>
+          </svg>
+          <span id="lbl-stats-title">Статистика просмотра</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.8rem;">
+          <div class="bg-zinc-900 p-2 rounded border border-zinc-800">
+            <span class="text-zinc-500 block text-xs" id="lbl-stat-viewed">Просмотрено</span>
+            <span id="stat-val-viewed" class="font-bold text-lg text-blue-500" style="color: var(--accent);">0</span>
+          </div>
+          <div class="bg-zinc-900 p-2 rounded border border-zinc-800">
+            <span class="text-zinc-500 block text-xs" id="lbl-stat-liked">В закладках</span>
+            <span id="stat-val-liked" class="font-bold text-lg text-emerald-500">0</span>
+          </div>
+          <div class="bg-zinc-900 p-2 rounded border border-zinc-800">
+            <span class="text-zinc-500 block text-xs" id="lbl-stat-loaded-mb">Загружено данных</span>
+            <span id="stat-val-loaded-mb" class="font-bold text-sm text-sky-400">0 MB</span>
+          </div>
+          <div class="bg-zinc-900 p-2 rounded border border-zinc-800">
+            <span class="text-zinc-500 block text-xs" id="lbl-stat-videos">Проиграно видео</span>
+            <span id="stat-val-videos" class="font-bold text-sm text-purple-400">0</span>
+          </div>
+          <div class="bg-zinc-900 p-2 rounded border border-zinc-800">
+            <span class="text-zinc-500 block text-xs" id="lbl-stat-fav-rating">Частый рейтинг</span>
+            <span id="stat-val-fav-rating" class="font-bold text-sm text-red-400">S (Safe)</span>
+          </div>
+          <div class="bg-zinc-900 p-2 rounded border border-zinc-800">
+            <span class="text-zinc-500 block text-xs" id="lbl-stat-avg-score">Средний рейтинг (Score)</span>
+            <span id="stat-val-avg-score" class="font-bold text-sm text-yellow-500">0</span>
+          </div>
+          <div class="bg-zinc-900 p-2 rounded border border-zinc-800 col-span-2">
+            <span class="text-zinc-500 block text-xs" id="lbl-stat-time">Общее время в приложении</span>
+            <span id="stat-val-time" class="font-bold text-sm text-amber-500">0м 0с</span>
+          </div>
+          <div class="bg-zinc-900 p-3 rounded border border-zinc-800 col-span-2">
+            <span class="text-zinc-500 block text-xs mb-1" id="lbl-stat-frequent">Частые категории</span>
+            <div id="stat-val-tags" class="flex flex-wrap gap-1 text-xs">...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Кабинет аккаунта -->
+      <div class="settings-group" id="group-account">
+        <div class="settings-summary" onclick="toggleAccordion('group-account')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            <span id="sum-account">Аккаунт e621.net</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="lbl-auth-desc">
+              Введите имя пользователя и API-ключ. Персональные данные хранятся локально в зашифрованном виде.
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <input type="text" id="auth-username" style="width: 100%;">
+              <input type="password" id="auth-api-key" style="width: 100%;">
+              <div style="display: flex; gap: 8px;">
+                <button class="action-btn primary" id="save-auth-btn" style="flex: 1;">Сохранить и подключить</button>
+                <button class="action-btn" id="btn-reg"
+                  style="flex: 1; border-color: var(--accent); color: var(--accent);">Регистрация</button>
+              </div>
+            </div>
+            <div id="auth-status" style="font-size: 0.8rem; color: var(--text-muted);">
+              Статус: Не подключен (Анонимный режим)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Кабинет аккаунта Rule34 -->
+      <div class="settings-group" id="group-account-r34">
+        <div class="settings-summary" onclick="toggleAccordion('group-account-r34')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            <span id="sum-account-r34">Аккаунт Rule34.xxx</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;" id="lbl-r34-auth-desc">
+              Для работы Rule34 требуется авторизация. Введите ваши API Key и User ID из настроек аккаунта на rule34.xxx.
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <input type="text" id="auth-r34-userid" autocomplete="new-password" placeholder="User ID" style="width: 100%;">
+              <input type="password" id="auth-r34-apikey" autocomplete="new-password" placeholder="API Key" style="width: 100%;">
+              <div>
+                <button class="action-btn primary" id="save-r34-auth-btn" style="width: 100%;">Сохранить</button>
+              </div>
+            </div>
+            <div id="r34-auth-status" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">
+              Статус: Не подключен (Анонимный режим)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Резервное копирование -->
+      <div class="settings-group" id="group-backup-suite">
+        <div class="settings-summary" onclick="toggleAccordion('group-backup-suite')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 4v1m6 11h2m-6 0h-2v4m0-16v4m0 4h.01M4 12h2m0 0h2v-4m0 16h2m-6-8h2"></path>
+            </svg>
+            <span id="sum-backup-suite">Резервное копирование</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div class="text-xs text-zinc-400 leading-relaxed mb-1" id="lbl-backup-desc">
+              Вы можете заархивировать все локальные закладки, блэклисты и кастомные стили в уникальный компактный
+              шифр-код.
+            </div>
+            <div class="flex flex-col gap-3">
+              <button class="action-btn primary w-full text-xs" id="btn-generate-backup">Сгенерировать код
+                бэкапа</button>
+              <div id="backup-output-wrap"
+                class="hidden flex flex-col gap-2 bg-zinc-900/60 p-3 rounded border border-zinc-800">
+                <textarea id="backup-code-area"
+                  class="bg-zinc-950 border border-zinc-800 rounded p-1.5 font-mono text-[9px] text-zinc-300 h-16 resize-none w-full"
+                  readonly></textarea>
+                <button class="action-btn text-xs py-1.5" id="btn-copy-backup-code">Копировать код</button>
+              </div>
+
+              <div class="border-t border-zinc-800/80 pt-3 flex flex-col gap-2">
+                <label class="text-xs font-bold text-zinc-400" id="lbl-import-code">Импорт бэкапа</label>
+                <input type="text" id="import-backup-input" placeholder="Вставьте код бэкапа..." class="text-xs">
+                <button class="action-btn text-xs py-2" id="btn-restore-backup"
+                  style="border-color: var(--accent); color: var(--accent);">Восстановить из кода</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Настройки прокси -->
+      <div class="settings-group" id="group-proxy">
+        <div class="settings-summary" onclick="toggleAccordion('group-proxy')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path>
+            </svg>
+            <span id="sum-proxy">Настройки прокси</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div class="setting-item flex-col !items-start gap-2">
+              <label id="lbl-api-base" class="text-xs font-bold text-zinc-400">Базовый адрес e621</label>
+              <input type="text" id="setting-api-base" value="https://e621.net" class="text-xs">
+            </div>
+            <div class="setting-item">
+              <label id="lbl-proxy-mode" class="text-xs font-bold text-zinc-400">Режим подключения</label>
+              <select id="setting-proxy-mode"
+                class="custom-select-ui w-44 bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs py-2 px-3 rounded-lg outline-none focus:border-[var(--accent)]">
+                <option value="direct" id="opt-proxy-direct">Прямое подключение</option>
+                <option value="fallback" id="opt-proxy-fallback" selected>CORS Прокси</option>
+                <option value="custom" id="opt-proxy-custom">Свой прокси-префикс</option>
+              </select>
+            </div>
+            <div id="custom-proxy-wrap" class="setting-item flex-col !items-start gap-2 hidden">
+              <label id="lbl-custom-proxy" class="text-xs font-bold text-zinc-400">Префикс прокси</label>
+              <input type="text" id="setting-custom-proxy" placeholder="https://myproxy.com/?url=" class="text-xs">
+            </div>
+            <button id="save-proxy-btn" class="action-btn primary w-full text-xs py-2">Сохранить прокси</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Безопасность и PIN-код -->
+      <div class="settings-group" id="group-security-suite">
+        <div class="settings-summary" onclick="toggleAccordion('group-security-suite')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+              </path>
+            </svg>
+            <span id="sum-security-suite">Безопасность и PIN-код</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div id="panic-disable-wrap"
+              class="hidden border border-red-500/40 pb-3 p-3 rounded-lg bg-gradient-to-br from-red-950/40 via-red-900/10 to-red-950/20 shadow-md mb-3 space-y-2">
+              <div class="text-xs font-bold text-red-400 flex items-center gap-2">
+                <span class="flex h-2 w-2 relative">
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                <span id="panic-warning-text">Экстренная маскировка активна!</span>
+              </div>
+              <p id="panic-description" class="text-[10px] text-zinc-400 leading-relaxed">Взрослый контент (18+) скрыт в
+                целях защиты конфиденциальности. Вы можете деактивировать этот режим кнопкой ниже.</p>
+              <button id="disable-panic-settings-btn"
+                class="w-full py-2 px-3 rounded text-white font-bold text-xs bg-red-600 hover:bg-red-500 border border-red-500 active:scale-95 transition-all duration-150 shadow-sm shadow-red-900/50">
+                Отключить режим паники
+              </button>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <label id="lbl-pin-toggle" class="text-xs font-bold text-zinc-400 flex flex-col">
+                  Защита четырехзначным PIN
+                  <span class="text-[10px] text-zinc-500 font-normal">Запрашивать PIN при запуске и выходе</span>
+                </label>
+                <label class="switch">
+                  <input type="checkbox" id="setting-pin-enabled">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div id="pin-actions-wrap" class="hidden flex gap-2">
+                <button id="set-pin-btn" class="action-btn text-xs py-1.5 flex-grow font-semibold">
+                  Изменить PIN
+                </button>
+              </div>
+            </div>
+
+            <div class="border-t border-zinc-800/80 pt-3 flex justify-between items-center">
+              <label id="lbl-nsfw-blur-toggle" class="text-xs font-bold text-zinc-400 flex flex-col">
+                Размывать 18+ контент
+                <span class="text-[10px] text-zinc-500 font-normal">Превью будут скрыты под размытием до клика</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="setting-nsfw-blur" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Внешний вид и фон -->
+      <div class="settings-group" id="group-appearance">
+        <div class="settings-summary" onclick="toggleAccordion('group-appearance')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-3">
+              </path>
+            </svg>
+            <span id="sum-appearance">Внешний вид и фон</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div>
+              <div class="text-xs font-bold mb-2 text-zinc-400 flex items-center gap-1.5" id="lbl-lang-title">
+                <span>Язык интерфейса</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="action-btn language-choice-btn" id="lang-btn-ru" style="flex: 1;">
+                  <svg class="language-flag-icon" viewBox="0 0 24 16" aria-hidden="true">
+                    <path fill="#fff" d="M0 0h24v5.34H0z"></path>
+                    <path fill="#2563eb" d="M0 5.33h24v5.34H0z"></path>
+                    <path fill="#dc2626" d="M0 10.66h24V16H0z"></path>
+                  </svg>
+                  <span>Русский</span>
+                </button>
+                <button class="action-btn language-choice-btn" id="lang-btn-en" style="flex: 1;">
+                  <svg class="language-flag-icon" viewBox="0 0 24 16" aria-hidden="true">
+                    <path fill="#fff" d="M0 0h24v16H0z"></path>
+                    <path fill="#dc2626" d="M0 0h24v2H0v2h24v2H0v2h24v2H0v2h24v2H0z"></path>
+                    <path fill="#1d4ed8" d="M0 0h10v8H0z"></path>
+                    <g fill="#fff">
+                      <circle cx="2" cy="2" r=".6"></circle>
+                      <circle cx="5" cy="2" r=".6"></circle>
+                      <circle cx="8" cy="2" r=".6"></circle>
+                      <circle cx="3.5" cy="4" r=".6"></circle>
+                      <circle cx="6.5" cy="4" r=".6"></circle>
+                      <circle cx="2" cy="6" r=".6"></circle>
+                      <circle cx="5" cy="6" r=".6"></circle>
+                      <circle cx="8" cy="6" r=".6"></circle>
+                    </g>
+                  </svg>
+                  <span>English</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="setting-item flex-col !items-start gap-2">
+              <label id="lbl-accent" class="text-xs font-bold text-zinc-400">Цвет темы<span>Цветовая гамма
+                  приложения</span></label>
+              <div class="color-presets grid grid-cols-6 gap-2 w-full pt-1">
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#2563eb" style="background:#2563eb;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#a855f7" style="background:#a855f7;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#22c55e" style="background:#22c55e;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#ec4899" style="background:#ec4899;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#06b6d4" style="background:#06b6d4;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#eab308" style="background:#eab308;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#f43f5e" style="background:#f43f5e;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#6366f1" style="background:#6366f1;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#f97316" style="background:#f97316;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#14b8a6" style="background:#14b8a6;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#84cc16" style="background:#84cc16;"></button>
+                <button class="color-dot w-8 h-8 rounded-full border-2 border-transparent transition active:scale-90"
+                  data-color="#fb7185" style="background:#fb7185;"></button>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <label id="lbl-rounding">Скругление интерфейса<span>Кнопки, карточки, панели</span></label>
+              <select id="setting-radius"
+                class="custom-select-ui w-44 bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs py-2 px-3 rounded-lg outline-none focus:border-[var(--accent)]">
+                <option value="0px" id="opt-radius-none">Без скругнения</option>
+                <option value="8px" id="opt-radius-standard" selected>Стандартное (8px)</option>
+                <option value="16px" id="opt-radius-extreme">Экстремальное (16px)</option>
+              </select>
+            </div>
+
+            <div class="border-t border-zinc-800/80 pt-4 mt-2">
+              <div class="text-xs font-bold text-zinc-400 mb-2" id="lbl-custom-bg-section">Собственные фоновые обои
+              </div>
+              <input type="file" id="custom-bg-input" accept="image/*"
+                class="bg-zinc-900 border border-zinc-800 p-1 w-full rounded text-xs text-zinc-300">
+              <div class="flex items-center justify-between gap-4 mt-3">
+                <span class="text-xs text-zinc-400" id="lbl-bg-opacity">Плотность затемнения фона</span>
+                <input type="range" id="bg-opacity-range" min="0.1" max="0.95" step="0.05" value="0.9"
+                  class="w-28 accent-[var(--accent)]">
+              </div>
+              <button id="clear-bg-btn" class="action-btn text-xs mt-3 w-full py-2 hover:bg-red-950/20"
+                style="border-color: var(--danger); color: var(--danger);">Сбросить фоновые обои</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Фильтры и черный список -->
+      <div class="settings-group" id="group-safety">
+        <div class="settings-summary" onclick="toggleAccordion('group-safety')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+              </path>
+            </svg>
+            <span id="sum-safety">Фильтры и черный список</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div class="space-y-3" id="rating-filters-block">
+              <div class="setting-item">
+                <label id="lbl-rate-safe">0+ (Safe / Безопасно)<span>Подходит для всех</span></label>
+                <label class="switch">
+                  <input type="checkbox" id="rating-safe" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label id="lbl-rate-quest">16+ (Questionable / Сомнительно)<span>Легкая эротика / намеки</span></label>
+                <label class="switch">
+                  <input type="checkbox" id="rating-questionable" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label id="lbl-rate-expl">18+ (Explicit / Откровенно)<span>Контент для взрослых</span></label>
+                <label class="switch-premium">
+                  <input type="checkbox" id="rating-explicit">
+                  <span class="slider-premium"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <label id="lbl-filter-ai">Скрывать AI-посты<span>Фильтровать изображения, созданные или обработанные генеративным ИИ</span></label>
+              <label class="switch">
+                <input type="checkbox" id="filter-ai-posts">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="border-t border-zinc-800/80 pt-4 mt-2">
+              <div class="text-xs font-bold text-zinc-400 mb-2" id="lbl-blacklist-title">Локальный Чёрный Список тегов
+              </div>
+              <div style="display: flex; gap: 6px; position: relative;">
+                <input type="text" id="blacklist-input" style="flex-grow: 1;" autocomplete="off">
+                <button class="action-btn primary" id="add-blacklist-btn" style="flex: 0 0 50px;">+</button>
+                <div id="blacklist-suggestions" class="suggestions" style="display: none;"></div>
+              </div>
+              <div class="tag-chips mt-3" id="blacklist-chips"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Трафик и производительность -->
+      <div class="settings-group" id="group-traffic">
+        <div class="settings-summary" onclick="toggleAccordion('group-traffic')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <span id="sum-traffic">Трафик и производительность</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div class="setting-item">
+              <label id="lbl-budget">Лимит трафика<span>Снижать качество при > 50 МБ</span></label>
+              <label class="switch">
+                <input type="checkbox" id="setting-data-budget" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label id="lbl-ram">Оптимизация памяти<span>Выгружать невидимые картинки</span></label>
+              <label class="switch">
+                <input type="checkbox" id="setting-ram-safeguard" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item border-t border-zinc-800/80 pt-3 mt-1">
+              <label id="lbl-eco-mode" class="text-emerald-400">
+                Энергосберегающий режим
+                <span class="text-zinc-500">Отключает размытия и тяжелые эффекты для слабых устройств</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="setting-eco-mode">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item border-t border-zinc-800/80 pt-3 mt-1">
+              <label id="lbl-startup-anim" class="text-zinc-200">
+                Анимация запуска
+                <span class="text-zinc-500">Плавное появление интерфейса при старте</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="setting-startup-anim" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Разметка ленты -->
+      <div class="settings-group" id="group-layout">
+        <div class="settings-summary" onclick="toggleAccordion('group-layout')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z">
+              </path>
+            </svg>
+            <span id="lbl-layout-title">Разметка ленты</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-bold text-zinc-400" id="lbl-grid-format">Формат сетки</span>
+              <div style="display: flex; gap: 8px;">
+                <button class="action-btn" id="shuffler-square" style="flex: 1;">Квадраты</button>
+                <button class="action-btn" id="shuffler-masonry" style="flex: 1;">Мозаика</button>
+                <button class="action-btn" id="shuffler-story" style="flex: 1;">Истории</button>
+              </div>
+            </div>
+
+            <div class="border-t border-zinc-850 pt-3 flex flex-col gap-2 mt-1">
+              <label id="lbl-feed-fit" class="text-xs font-bold text-zinc-400">Масштабирование картинок<span>Обрезать
+                  миниатюры или вписывать в оригинальный размер</span></label>
+              <select id="setting-feed-fit"
+                class="custom-select-ui bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs py-2 px-3 rounded-lg outline-none focus:border-[var(--accent)]">
+                <option value="cover" id="opt-fit-cover">Обрезать (1:1)</option>
+                <option value="contain" id="opt-fit-contain">Оригинальный размер (Contain)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Правовая информация -->
+      <div class="settings-group" id="group-legal">
+        <div class="settings-summary" onclick="toggleAccordion('group-legal')">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4">
+              </path>
+            </svg>
+            <span id="sum-legal-info">Правовая информация</span>
+          </span>
+        </div>
+        <div class="settings-content-wrapper">
+          <div class="settings-content">
+            <p class="text-xs text-zinc-400 leading-relaxed mb-1" id="lbl-legal-desc">
+              Юридические положения, конфиденциальность, использование файлов cookie и контактные данные.
+            </p>
+            <button class="action-btn primary w-full text-xs py-2.5 font-bold flex items-center justify-center gap-2"
+              id="open-legal-btn">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+              </svg>
+              <span id="lbl-btn-view-legal">Читать соглашение</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 mb-2 text-center">
+        <a href="https://t.me/VelVetus_Chromus" target="_blank" id="author-tg-link"
+          class="text-[9px] text-zinc-500/20 hover:text-zinc-500/80 transition-colors duration-300 font-mono tracking-widest block py-2 select-text">
+          TGK: t.me/VelVetus_Chromus
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="detail-overlay" id="detail-overlay">
+    <div class="detail-header">
+      <button class="detail-close" id="detail-close-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div style="color: var(--text-color); font-size: 0.8rem; font-weight: bold;" id="swipe-hint"
+        class="flex gap-2 items-center">
+        <button id="detail-slideshow-btn"
+          class="bg-zinc-900 border border-zinc-800 text-xs px-2.5 py-1 rounded hover:border-amber-500 hover:text-amber-400 transition-all duration-150 flex items-center gap-1">
+          <span id="detail-slideshow-label">▶ Слайдшоу</span>
+        </button>
+        <button id="detail-fit-toggle"
+          class="bg-zinc-900 border border-zinc-800 text-xs px-2.5 py-1 rounded hover:border-[var(--accent)] transition-all duration-150">Заполнить</button>
+      </div>
+    </div>
+
+    <div class="detail-card-container" id="detail-card-container">
+      <canvas id="ambient-canvas" class="ambient-canvas"></canvas>
+
+      <div class="swipe-indicator like" id="ind-like">СОХРАНЕНО</div>
+      <div class="swipe-indicator skip" id="ind-skip">ПРОПУСК</div>
+
+      <button id="detail-prev-btn"
+        class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/55 backdrop-blur border border-zinc-800/80 text-white p-3.5 rounded-full z-[12] transition duration-200 active:scale-90 flex items-center justify-center shadow-lg"
+        title="Предыдущее фото">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+
+      <div class="detail-media-wrapper" id="detail-media-wrapper"></div>
+
+      <button id="detail-next-btn"
+        class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/55 backdrop-blur border border-zinc-800/80 text-white p-3.5 rounded-full z-[12] transition duration-200 active:scale-90 flex items-center justify-center shadow-lg"
+        title="Следующее фото">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="detail-footer">
+      <div class="detail-actions">
+        <button class="action-btn" id="detail-download-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            class="mr-1">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span id="lbl-download-btn-text">Скачать</span>
+        </button>
+        <button class="action-btn primary" id="detail-bookmark-btn">
+          В закладки
+        </button>
+      </div>
+
+      <div id="comments-main-container" class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 space-y-3">
+        <h4 id="lbl-comments-title" class="font-bold text-sm text-zinc-300 border-b border-zinc-800 pb-2">Комментарии
+        </h4>
+        <div id="comments-feed" class="space-y-2 max-height-60 overflow-y-auto text-xs text-zinc-400">
+        </div>
+      </div>
+
+      <div class="detail-tags" id="detail-tags-container"></div>
+    </div>
+  </div>
+
+  <div class="detail-overlay" id="legal-overlay">
+    <div class="detail-header">
+      <button class="detail-close" id="legal-close-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div style="color: var(--text-color); font-size: 0.85rem; font-weight: bold;" id="lbl-legal-header-title">
+        Пользовательское соглашение</div>
+    </div>
+
+    <div class="p-6 pb-20 max-w-xl mx-auto space-y-8 text-zinc-300 text-xs leading-relaxed" id="legal-content-body">
+    </div>
+  </div>
+
+  <div id="eula-overlay"
+    class="fixed inset-0 bg-zinc-950/98 backdrop-blur-md z-[2000] flex flex-col justify-between p-6 overflow-y-auto hidden">
+    <div class="max-w-md mx-auto w-full my-auto space-y-6">
+      <div class="flex gap-4 justify-center">
+        <button id="eula-lang-ru" class="action-btn language-choice-btn px-4 py-2 text-sm">
+          <svg class="language-flag-icon" viewBox="0 0 24 16" aria-hidden="true">
+            <path fill="#fff" d="M0 0h24v5.34H0z"></path>
+            <path fill="#2563eb" d="M0 5.33h24v5.34H0z"></path>
+            <path fill="#dc2626" d="M0 10.66h24V16H0z"></path>
+          </svg>
+          <span>Русский</span>
+        </button>
+        <button id="eula-lang-en" class="action-btn language-choice-btn px-4 py-2 text-sm">
+          <svg class="language-flag-icon" viewBox="0 0 24 16" aria-hidden="true">
+            <path fill="#fff" d="M0 0h24v16H0z"></path>
+            <path fill="#dc2626" d="M0 0h24v2H0v2h24v2H0v2h24v2H0v2h24v2H0z"></path>
+            <path fill="#1d4ed8" d="M0 0h10v8H0z"></path>
+            <g fill="#fff">
+              <circle cx="2" cy="2" r=".6"></circle>
+              <circle cx="5" cy="2" r=".6"></circle>
+              <circle cx="8" cy="2" r=".6"></circle>
+              <circle cx="3.5" cy="4" r=".6"></circle>
+              <circle cx="6.5" cy="4" r=".6"></circle>
+              <circle cx="2" cy="6" r=".6"></circle>
+              <circle cx="5" cy="6" r=".6"></circle>
+              <circle cx="8" cy="6" r=".6"></circle>
+            </g>
+          </svg>
+          <span>English</span>
+        </button>
+      </div>
+
+      <div class="text-center space-y-2">
+        <h2 class="text-xl font-extrabold text-red-500 tracking-tight" id="eula-main-title">ВНИМАНИЕ / ATTENTION</h2>
+        <p class="text-xs text-zinc-500" id="eula-sub-title">NSFW Content Verification Hub & EULA Agreement</p>
+      </div>
+
+      <div
+        class="bg-zinc-900/80 border border-zinc-800/80 rounded-lg p-4 h-80 overflow-y-auto text-xs text-zinc-400 leading-relaxed space-y-3"
+        id="eula-terms-box"></div>
+
+      <label class="flex items-start gap-3 cursor-pointer select-none py-1">
+        <input type="checkbox" id="eula-checkbox"
+          class="mt-1 rounded border-zinc-800 bg-zinc-900 text-blue-600 focus:ring-blue-500 focus:ring-offset-zinc-950">
+        <span class="text-xs text-zinc-400 leading-snug" id="lbl-eula-checkbox-text">
+          Я подтверждаю, что мне исполнилось 18 лет, и я полностью принимаю условия данного пользовательского
+          соглашения.
+        </span>
+      </label>
+
+      <button id="eula-confirm-btn"
+        class="w-full py-3 px-4 rounded text-white font-bold text-sm transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style="background-color: var(--accent);" disabled>
+        Подтвердить и Продолжить
+      </button>
+    </div>
+  </div>
+
+  <div id="pin-overlay-screen"
+    class="fixed inset-0 bg-[#09090b] z-[9999] hidden flex flex-col justify-center items-center select-none">
+    <div class="w-64 space-y-8 flex flex-col items-center">
+      <div class="text-center space-y-2">
+        <div class="logo text-lg font-bold tracking-tight">CHROMIUM<span class="provider-brand-suffix">E621</span></div>
+        <div id="user-greeting" class="text-[10px] text-zinc-500 italic mt-1"></div>
+        <p id="pin-screen-prompt" class="text-xs text-zinc-400">Введите PIN-код для входа</p>
+      </div>
+
+      <div class="flex gap-5" id="pin-visual-dots">
+        <div class="w-3.5 h-3.5 rounded-full border-2 border-zinc-700 bg-transparent transition-all duration-150"></div>
+        <div class="w-3.5 h-3.5 rounded-full border-2 border-zinc-700 bg-transparent transition-all duration-150"></div>
+        <div class="w-3.5 h-3.5 rounded-full border-2 border-zinc-700 bg-transparent transition-all duration-150"></div>
+        <div class="w-3.5 h-3.5 rounded-full border-2 border-zinc-700 bg-transparent transition-all duration-150"></div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 w-full">
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="1">1</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="2">2</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="3">3</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="4">4</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="5">5</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="6">6</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="7">7</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="8">8</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="9">9</button>
+        <button
+          class="pin-key-btn py-3.5 text-zinc-500 rounded-xl flex items-center justify-center transition active:scale-90"
+          data-action="clear">✕</button>
+        <button
+          class="pin-key-btn py-3.5 bg-zinc-900 hover:bg-zinc-800 text-lg font-bold rounded-xl border border-zinc-800/80 active:scale-95 transition"
+          data-num="0">0</button>
+        <button
+          class="pin-key-btn py-3.5 text-zinc-500 rounded-xl flex items-center justify-center transition active:scale-90"
+          data-action="backspace">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="peek-overlay" id="peek-overlay">
+    <div class="peek-content" id="peek-content"></div>
+  </div>
+
+  <div id="custom-toast"></div>
+
+  <nav class="tab-bar" id="bottom-tab-bar">
+    <button class="tab-btn active" data-view="gallery" id="tab-btn-gallery">
+      <svg id="icon-gallery" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+        </path>
+      </svg>
+      <span id="tab-gallery">Галерея</span>
+    </button>
+    <button class="tab-btn" data-view="bookmarks" id="tab-btn-bookmarks">
+      <svg id="icon-bookmarks" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+        </path>
+      </svg>
+      <span id="tab-bookmarks">Избранное</span>
+    </button>
+
+    <button class="tab-btn" id="tab-btn-random" data-action="random">
+      <svg id="icon-random" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4">
+        </path>
+      </svg>
+      <span id="tab-random">Рандом</span>
+    </button>
+
+    <button class="tab-btn" data-view="recommendations" id="tab-btn-recs">
+      <svg id="icon-recs" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.371 1.24.588 1.81l-3.97 2.89a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.89a1 1 0 00-1.175 0l-3.97 2.89c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.97-2.89c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+        </path>
+      </svg>
+      <span id="tab-recs">Для вас</span>
+    </button>
+    <button class="tab-btn" data-view="settings" id="tab-btn-settings">
+      <svg id="icon-settings" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+        </path>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+      <span id="tab-settings">Настройки</span>
+    </button>
+  </nav>
+
+  <script src="./js/app.js"></script>
+
+  <!-- Promo Mode Modal -->
+  <div id="promo-modal" class="peek-overlay" style="display: none; z-index: 10000;">
+    <div
+      class="peek-content bg-zinc-950 border border-amber-500 p-5 rounded-lg w-full max-w-sm flex flex-col gap-4 text-zinc-200">
+      <h3 class="text-lg font-bold text-amber-500 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+          </path>
+        </svg>
+        Режим "Промо"
+      </h3>
+      <p class="text-xs text-zinc-400">Отладочный режим для настройки визуала, скриншотов или презентаций.</p>
+
+      <div class="flex flex-col gap-3">
+        <div class="setting-item">
+          <span class="flex flex-col"><span class="text-sm font-bold text-zinc-200">Скрыть шапку и панели</span></span>
+          <label class="switch"><input type="checkbox" id="promo-hide-ui"><span class="slider"></span></label>
+        </div>
+
+        <div class="setting-item">
+          <span class="flex flex-col"><span class="text-sm font-bold text-zinc-200">Отключить все анимации</span></span>
+          <label class="switch"><input type="checkbox" id="promo-no-anim"><span class="slider"></span></label>
+        </div>
+
+        <div class="setting-item">
+          <span class="flex flex-col"><span class="text-sm font-bold text-zinc-200">Размыть все превью</span></span>
+          <label class="switch"><input type="checkbox" id="promo-blur-img"><span class="slider"></span></label>
+        </div>
+
+        <div class="setting-item">
+          <span class="flex flex-col"><span class="text-sm font-bold text-zinc-200">Хромакей (Зеленый фон)</span></span>
+          <label class="switch"><input type="checkbox" id="promo-green-bg"><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1 mt-2">
+        <label class="text-xs font-bold text-zinc-400">Кастомный CSS-инжект (редактор стилей):</label>
+        <textarea id="promo-custom-css"
+          class="w-full bg-black/80 border border-zinc-700 rounded p-2 text-xs font-mono h-24 text-zinc-300 focus:border-amber-500 outline-none"
+          placeholder="/* Например, скрыть лайки: */&#10;.post-likes { display: none !important; }"></textarea>
+      </div>
+
+      <div class="flex justify-between gap-3 mt-4">
+        <button class="action-btn flex-1 py-2"
+          onclick="document.getElementById('promo-modal').style.display='none'">Закрыть</button>
+        <button class="action-btn flex-1 py-2" style="background: #f59e0b; color: #fff; border-color: #d97706;"
+          onclick="applyPromoMode()">Применить</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

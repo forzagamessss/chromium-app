@@ -1,0 +1,26 @@
+{
+  "appId": "com.chromium.e621.client",
+  "appName": "Chromium E621",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": false,
+    "webContentsDebuggingEnabled": false,
+    "minSdkVersion": 21,
+    "targetSdkVersion": 33,
+    "buildOptions": {
+      "keystorePath": "",
+      "keystoreAlias": "",
+      "keystorePassword": "",
+      "keyPassword": ""
+    }
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
