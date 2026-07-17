@@ -1,0 +1,91 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: build-tools;34.0.0
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build web assets
+        run: npm run build
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: Generate Android icons
+        run: node generate-assets.js
+
+      - name: Sync Capacitor
+        run: npm run sync
+
+      - name: Verify native downloader
+        run: |
+          grep -q "registerPlugin(MediaDownloaderPlugin.class)" \
+            android/app/src/main/java/com/chromium/e621/client/MainActivity.java
+          test -f \
+            android/app/src/main/java/com/chromium/e621/client/MediaDownloaderPlugin.java
+
+      - name: Build release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Sign release APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > release-key.jks
+          /usr/local/lib/android/sdk/build-tools/34.0.0/zipalign -v 4 \
+            android/app/build/outputs/apk/release/app-release-unsigned.apk \
+            aligned.apk
+          /usr/local/lib/android/sdk/build-tools/34.0.0/apksigner sign \
+            --ks release-key.jks \
+            --ks-pass pass:"$KEYSTORE_PASSWORD" \
+            --key-pass pass:"$KEYSTORE_PASSWORD" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --out chromium-e621-app.apk \
+            aligned.apk
+          /usr/local/lib/android/sdk/build-tools/34.0.0/apksigner verify \
+            chromium-e621-app.apk
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: chromium-e621-release-apk
+          path: chromium-e621-app.apk
+          retention-days: 30
